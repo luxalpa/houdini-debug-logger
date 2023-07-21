@@ -10,7 +10,19 @@ use hapi_rs::geometry::PartInfo;
 use hapi_rs::node::{Geometry, HoudiniNode};
 use hapi_rs::session::{connect_to_socket, quick_session, Session};
 
-pub fn houlog<T: DebugLoggable + 'static>(name: &str, v: T) {
+pub trait IntoLoggable {
+    type LoggableType: DebugLoggable + 'static;
+    fn into_loggable(self) -> Self::LoggableType;
+}
+
+impl<T: DebugLoggable + 'static> IntoLoggable for T {
+    type LoggableType = T;
+    fn into_loggable(self) -> Self::LoggableType {
+        self
+    }
+}
+
+pub fn houlog<T: IntoLoggable>(name: &str, v: T) {
     let logger = match HOUDINI_DEBUG_LOGGER.get() {
         Some(logger) => logger,
         None => {
@@ -18,7 +30,7 @@ pub fn houlog<T: DebugLoggable + 'static>(name: &str, v: T) {
             return;
         }
     };
-    logger.log(name, v).unwrap();
+    logger.log(name, v.into_loggable()).unwrap();
 }
 
 pub fn houlog_next_frame() -> Result<()> {
