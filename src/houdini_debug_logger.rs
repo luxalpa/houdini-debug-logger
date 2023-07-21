@@ -364,9 +364,9 @@ mod tests {
     use glam::{Mat4, Quat, Vec3};
 
     #[test]
-    fn test() {
-        // init_houlog("./houlog.bgeo").unwrap();
-        init_houlog_live(None).unwrap();
+    fn test() -> Result<()> {
+        // init_houlog("./houlog.bgeo")?;
+        init_houlog_live(None)?;
         houlog("test", Vec3::new(1.0, 2.0, 3.0));
         houlog(
             "test",
@@ -395,6 +395,8 @@ mod tests {
             },
         );
 
-        save_houlog().unwrap();
+        save_houlog()?;
+
+        Ok(())
     }
 }
