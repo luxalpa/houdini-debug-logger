@@ -2,96 +2,15 @@ use std::net::{Ipv4Addr, SocketAddrV4};
 use std::path::PathBuf;
 use std::sync::{Mutex, OnceLock};
 
+use crate::loggable::DebugLoggable;
 use anyhow::{anyhow, Result};
-use glam::{Mat4, Quat, Vec3};
 use hapi_rs::attribute::{AttributeInfo, StorageType};
 use hapi_rs::enums::{AttributeOwner, AttributeTypeInfo, PartType};
 use hapi_rs::geometry::PartInfo;
 use hapi_rs::node::{Geometry, HoudiniNode};
 use hapi_rs::session::{connect_to_socket, quick_session, Session};
-use serde_json::json;
 
-pub trait DebugLoggable: Send {
-    fn position(&self) -> Vec3 {
-        Vec3::new(0.0, 0.0, 0.0)
-    }
-    fn as_json(&self) -> String;
-    fn kind(&self) -> String;
-}
-
-impl DebugLoggable for Vec3 {
-    fn position(&self) -> Vec3 {
-        *self
-    }
-    fn as_json(&self) -> String {
-        json!(
-            {
-                "pt": [self.x, self.y, self.z]
-            }
-        )
-        .to_string()
-    }
-
-    fn kind(&self) -> String {
-        "vec3".to_string()
-    }
-}
-
-impl DebugLoggable for Mat4 {
-    fn position(&self) -> Vec3 {
-        self.w_axis.truncate()
-    }
-    fn as_json(&self) -> String {
-        json!(
-            {
-                "xform": [
-                    self.x_axis.x, self.x_axis.y, self.x_axis.z, self.x_axis.w,
-                    self.y_axis.x, self.y_axis.y, self.y_axis.z, self.y_axis.w,
-                    self.z_axis.x, self.z_axis.y, self.z_axis.z, self.z_axis.w,
-                    self.w_axis.x, self.w_axis.y, self.w_axis.z, self.w_axis.w,
-                ]
-            }
-        )
-        .to_string()
-    }
-
-    fn kind(&self) -> String {
-        "mat4".to_string()
-    }
-}
-
-impl DebugLoggable for Quat {
-    fn position(&self) -> Vec3 {
-        Vec3::new(0.0, 0.0, 0.0)
-    }
-    fn as_json(&self) -> String {
-        json!(
-            {
-                "quat": [self.x, self.y, self.z, self.w]
-            }
-        )
-        .to_string()
-    }
-
-    fn kind(&self) -> String {
-        "quat".to_string()
-    }
-}
-
-impl DebugLoggable for f32 {
-    fn position(&self) -> Vec3 {
-        Vec3::new(0.0, 0.0, 0.0)
-    }
-    fn as_json(&self) -> String {
-        json!({ "float": self }).to_string()
-    }
-
-    fn kind(&self) -> String {
-        "float".to_string()
-    }
-}
-
-pub fn houlog<T: DebugLoggable + 'static + Clone>(name: &str, v: T) {
+pub fn houlog<T: DebugLoggable + 'static>(name: &str, v: T) {
     let logger = match HOUDINI_DEBUG_LOGGER.get() {
         Some(logger) => logger,
         None => {
@@ -99,7 +18,7 @@ pub fn houlog<T: DebugLoggable + 'static + Clone>(name: &str, v: T) {
             return;
         }
     };
-    logger.log(name, v.clone()).unwrap();
+    logger.log(name, v).unwrap();
 }
 
 pub fn houlog_next_frame() -> Result<()> {
@@ -441,10 +360,11 @@ impl Drop for HoudiniDebugLogger {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use glam::Quat;
+    use crate::{Line, Polygon};
+    use glam::{Mat4, Quat, Vec3};
+
     #[test]
     fn test() {
-        // TODO: Support session loading
         // init_houlog("./houlog.bgeo").unwrap();
         init_houlog_live(None).unwrap();
         houlog("test", Vec3::new(1.0, 2.0, 3.0));
@@ -455,6 +375,26 @@ mod tests {
                 Vec3::new(5.0, 0.0, 0.0),
             ),
         );
+        houlog(
+            "test-line",
+            Line {
+                start: Vec3::new(0.5, 0.5, 0.0),
+                end: Vec3::new(1.0, 1.0, 1.0),
+            },
+        );
+
+        houlog(
+            "test-poly",
+            Polygon {
+                points: vec![
+                    Vec3::new(0.0, 0.0, 0.0),
+                    Vec3::new(1.0, 0.0, 0.0),
+                    Vec3::new(1.0, 1.0, 0.0),
+                    Vec3::new(0.0, 1.0, 0.0),
+                ],
+            },
+        );
+
         save_houlog().unwrap();
     }
 }
