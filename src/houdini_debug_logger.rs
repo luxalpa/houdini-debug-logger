@@ -372,7 +372,7 @@ impl Drop for HoudiniDebugLogger {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Line, Polygon};
+    use crate::{Line, Polygon, Polyline};
     use glam::{Mat4, Quat, Vec3};
 
     #[test]
@@ -392,6 +392,17 @@ mod tests {
             Line {
                 start: Vec3::new(0.5, 0.5, 0.0),
                 end: Vec3::new(1.0, 1.0, 1.0),
+            },
+        );
+
+        houlog(
+            "test-poly-line",
+            Polyline {
+                points: vec![
+                    Vec3::new(2.5, 2.5, 0.0),
+                    Vec3::new(2.0, 2.0, 2.0),
+                    Vec3::new(2.0, 3.0, 2.0),
+                ],
             },
         );
 

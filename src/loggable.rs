@@ -1,3 +1,4 @@
+use crate::IntoLoggable;
 use glam::{Mat4, Quat, Vec3};
 use serde_json::json;
 
@@ -81,32 +82,45 @@ impl DebugLoggable for f32 {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct Polyline {
+    pub points: Vec<Vec3>,
+}
+
+impl DebugLoggable for Polyline {
+    fn kind(&self) -> String {
+        "line".to_string()
+    }
+    fn position(&self) -> Vec3 {
+        self.points[0]
+    }
+
+    fn as_json(&self) -> String {
+        let x = self.points.iter().map(|pt| pt.x).collect::<Vec<f32>>();
+        let y = self.points.iter().map(|pt| pt.y).collect::<Vec<f32>>();
+        let z = self.points.iter().map(|pt| pt.z).collect::<Vec<f32>>();
+
+        json!({
+            "x": x,
+            "y": y,
+            "z": z,
+        })
+        .to_string()
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct Line {
     pub start: Vec3,
     pub end: Vec3,
 }
 
-impl DebugLoggable for Line {
-    fn kind(&self) -> String {
-        "line".to_string()
-    }
-    fn position(&self) -> Vec3 {
-        self.start
-    }
-
-    fn as_json(&self) -> String {
-        json!(
-            {
-                "pt1": [
-                    self.start.x, self.start.y, self.start.z,
-                ],
-                "pt2": [
-                    self.end.x, self.end.y, self.end.z,
-                ],
-            }
-        )
-        .to_string()
+impl IntoLoggable for Line {
+    type LoggableType = Polyline;
+    fn into_loggable(self) -> Self::LoggableType {
+        Polyline {
+            points: vec![self.start, self.end],
+        }
     }
 }
 
