@@ -150,3 +150,34 @@ impl DebugLoggable for Polygon {
         .to_string()
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct Mesh {
+    pub vertices: Vec<Vec3>,
+    pub indices: Vec<usize>,
+    pub index_counts: Vec<usize>,
+}
+
+impl DebugLoggable for Mesh {
+    fn kind(&self) -> String {
+        "mesh".to_string()
+    }
+    fn position(&self) -> Vec3 {
+        self.vertices[0]
+    }
+
+    fn as_json(&self) -> String {
+        let x = self.vertices.iter().map(|pt| pt.x).collect::<Vec<f32>>();
+        let y = self.vertices.iter().map(|pt| pt.y).collect::<Vec<f32>>();
+        let z = self.vertices.iter().map(|pt| pt.z).collect::<Vec<f32>>();
+
+        json!({
+            "x": x,
+            "y": y,
+            "z": z,
+            "i": self.indices,
+            "c": self.index_counts,
+        })
+        .to_string()
+    }
+}
