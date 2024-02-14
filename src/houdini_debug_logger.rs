@@ -10,8 +10,15 @@ use hapi_rs::geometry::PartInfo;
 use hapi_rs::node::{Geometry, HoudiniNode};
 use hapi_rs::session::{connect_to_socket, quick_session, Session};
 
+/// Trait that can be implemented for converting any types into a loggable type. Theoretically,
+/// DebugLoggable could be used instead, but that would require making the HDA aware of the new type.
+/// Using this one instead is typically preferred and mostly just a convenience helper to be able
+/// to pass custom types directly into [`houlog`].
 pub trait IntoLoggable {
+    /// The loggable type that this type can be converted into.
     type LoggableType: DebugLoggable + 'static;
+
+    /// Convert the type into a loggable type.
     fn into_loggable(self) -> Self::LoggableType;
 }
 
@@ -22,6 +29,7 @@ impl<T: DebugLoggable + 'static> IntoLoggable for T {
     }
 }
 
+/// The main logging function. Please note that this currently operates on global state.
 pub fn houlog<T: IntoLoggable>(name: &str, v: T) {
     let logger = match HOUDINI_DEBUG_LOGGER.get() {
         Some(logger) => logger,
@@ -33,6 +41,11 @@ pub fn houlog<T: IntoLoggable>(name: &str, v: T) {
     logger.log(name, v.into_loggable()).unwrap();
 }
 
+/// Advance the logger to the next frame. When first initializing the logger, it starts on frame 0,
+/// so typically this is only needed when you want to log data for multiple frames.
+/// This is the frames in the recording, it does not have to be actual frames in your code. For
+/// example, a world generation algorithm could separate the different stages of the generation into
+/// different frames.
 pub fn houlog_next_frame() -> Result<()> {
     let logger = match HOUDINI_DEBUG_LOGGER.get() {
         Some(logger) => logger,
@@ -44,18 +57,25 @@ pub fn houlog_next_frame() -> Result<()> {
     logger.next_frame()
 }
 
+/// This initializes houlog to write to a file. Typically, you'd want to use [`init_houlog_live`]
+/// instead which gives immediate feedback without needing to manually reload.
 pub fn init_houlog(path: impl Into<PathBuf>) -> Result<()> {
     HOUDINI_DEBUG_LOGGER
         .set(HoudiniDebugLogger::new_with_file(path.into()))
         .map_err(|_| anyhow!("HoudiniDebugLogger already initialized"))
 }
 
+/// This initializes houlog to write to a live Houdini session. If you're already attached to a
+/// session for a different purpose (for example live-reloading), you can pass it in here.
+/// You must have a live session running in Houdini which you can start via the
+/// "Houdini Engine SessionSync" pane tab (which can be found clicking on the + and then under New Pane Tab Type -> Misc).
 pub fn init_houlog_live(session: Option<Session>) -> Result<()> {
     HOUDINI_DEBUG_LOGGER
         .set(HoudiniDebugLogger::new_with_live_session(session)?)
         .map_err(|_| anyhow!("HoudiniDebugLogger already initialized"))
 }
 
+/// Save the session and send it to Houdini.
 pub fn save_houlog() -> Result<()> {
     let logger = match HOUDINI_DEBUG_LOGGER.get() {
         Some(logger) => logger,
@@ -69,13 +89,20 @@ pub fn save_houlog() -> Result<()> {
 
 static HOUDINI_DEBUG_LOGGER: OnceLock<HoudiniDebugLogger> = OnceLock::new();
 
+/// The method of exporting the data. This can either be a live session or a file.
 pub enum ExportMethod {
     LiveSession {
+        /// The hapi-rs session to use.
         session: Session,
+
+        /// The path to the subnet in which the node will be stored
         path: String,
+
+        /// The name of the node
         node_name: String,
     },
     File {
+        /// The full filepath to the file to be created. Typically, this should end with `.bgeo`.
         path: PathBuf,
     },
 }

@@ -2,11 +2,20 @@ use crate::IntoLoggable;
 use glam::{Mat4, Quat, Vec3};
 use serde_json::json;
 
+/// A trait for types that can be logged to Houdini. This must be kept in sync with the HDA or
+/// houdini node that parses the log data. For just logging a custom type, use the [`IntoLoggable`]
+/// trait if possible.
 pub trait DebugLoggable: Send {
+    /// The kind of the data, for example `mat4` or `vec3`.
     fn kind(&self) -> String;
+
+    /// The "root" position of the data. Not all data types necessarily have a meaningful position,
+    /// which is fine.
     fn position(&self) -> Vec3 {
         Vec3::new(0.0, 0.0, 0.0)
     }
+
+    /// The metadata of the data, as a JSON string.
     fn as_json(&self) -> String;
 }
 
