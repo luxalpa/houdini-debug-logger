@@ -68,9 +68,9 @@ checksum = "151665d9be52f9bb40fc7966565d39666f2d1e69233571b71b87791c7e0528b3"
 
 [[package]]
 name = "hapi-rs"
-version = "0.9.3"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4bb1195cebc6025e37531b1a9fc4c653ad6f3939eee3681034d4bcc1dee4f224"
+checksum = "a65ca8ca93a32de40c8c7a2670ba98e0f5da43123b32d95cfbe42ddd4c3ab24a"
 dependencies = [
  "debug-ignore",
  "duplicate",
