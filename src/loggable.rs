@@ -190,3 +190,59 @@ impl DebugLoggable for Mesh {
         .to_string()
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct Armature {
+    pub names: Vec<String>,
+    pub parents: Vec<i32>,
+    pub xforms: Vec<Mat4>,
+}
+
+impl DebugLoggable for Armature {
+    fn kind(&self) -> String {
+        "armature".to_string()
+    }
+    fn position(&self) -> Vec3 {
+        self.xforms[0].w_axis.truncate()
+    }
+
+    fn as_json(&self) -> String {
+        let xforms = self
+            .xforms
+            .iter()
+            .flat_map(|xform| xform.to_cols_array())
+            .collect::<Vec<f32>>();
+
+        json!({
+            "names": self.names,
+            "xforms": xforms,
+            "parents": self.parents,
+        })
+        .to_string()
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Capsule {
+    pub point_a: Vec3,
+    pub point_b: Vec3,
+    pub radius: f32,
+}
+
+impl DebugLoggable for Capsule {
+    fn kind(&self) -> String {
+        "capsule".to_string()
+    }
+    fn position(&self) -> Vec3 {
+        (self.point_a + self.point_b) / 2.0
+    }
+
+    fn as_json(&self) -> String {
+        json!({
+            "a": [self.point_a.x, self.point_a.y, self.point_a.z],
+            "b": [self.point_b.x, self.point_b.y, self.point_b.z],
+            "r": self.radius,
+        })
+        .to_string()
+    }
+}

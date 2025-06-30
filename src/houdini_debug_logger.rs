@@ -34,7 +34,7 @@ pub fn houlog<T: IntoLoggable>(name: &str, v: T) {
     let logger = match HOUDINI_DEBUG_LOGGER.get() {
         Some(logger) => logger,
         None => {
-            println!("HoudiniDebugLogger not initialized");
+            log::warn!("HoudiniDebugLogger not initialized");
             return;
         }
     };
@@ -50,7 +50,7 @@ pub fn houlog_next_frame() -> Result<()> {
     let logger = match HOUDINI_DEBUG_LOGGER.get() {
         Some(logger) => logger,
         None => {
-            println!("HoudiniDebugLogger not initialized");
+            log::warn!("HoudiniDebugLogger not initialized");
             return Ok(());
         }
     };
@@ -80,7 +80,7 @@ pub fn save_houlog() -> Result<()> {
     let logger = match HOUDINI_DEBUG_LOGGER.get() {
         Some(logger) => logger,
         None => {
-            println!("HoudiniDebugLogger not initialized");
+            log::warn!("HoudiniDebugLogger not initialized");
             return Ok(());
         }
     };
@@ -399,7 +399,7 @@ impl Drop for HoudiniDebugLogger {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Line, Polygon, Polyline};
+    use crate::{Armature, Capsule, Line, Polygon, Polyline};
     use glam::{Mat4, Quat, Vec3};
 
     #[test]
@@ -442,6 +442,27 @@ mod tests {
                     Vec3::new(1.0, 1.0, 0.0),
                     Vec3::new(0.0, 1.0, 0.0),
                 ],
+            },
+        );
+
+        houlog(
+            "test-armature",
+            Armature {
+                names: vec!["root".to_string(), "child".to_string()],
+                parents: vec![-1, 0],
+                xforms: vec![
+                    Mat4::IDENTITY,
+                    Mat4::from_translation(Vec3::new(1.0, 0.0, 0.0)),
+                ],
+            },
+        );
+
+        houlog(
+            "test-capsule",
+            Capsule {
+                point_a: Vec3::new(0.0, 0.0, 0.0),
+                point_b: Vec3::new(1.0, 0.0, 0.0),
+                radius: 0.5,
             },
         );
 
