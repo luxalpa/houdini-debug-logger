@@ -460,9 +460,12 @@ mod tests {
         houlog(
             "test-capsule",
             Capsule {
-                point_a: Vec3::new(0.0, 0.0, 0.0),
-                point_b: Vec3::new(1.0, 0.0, 0.0),
-                radius: 0.5,
+                xform: Mat4::from_rotation_translation(
+                    Quat::from_axis_angle(Vec3::Y, 45f32.to_radians()),
+                    Vec3::new(0.0, 0.0, 4.0),
+                ),
+                half_height: 1.0,
+                radius: 0.6,
             },
         );
 

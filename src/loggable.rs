@@ -1,5 +1,5 @@
 use crate::IntoLoggable;
-use glam::{Mat4, Quat, Vec3};
+use glam::{Mat3, Mat4, Quat, Vec3};
 use serde_json::json;
 
 /// A trait for types that can be logged to Houdini. This must be kept in sync with the HDA or
@@ -230,11 +230,12 @@ impl DebugLoggable for Armature {
     }
 }
 
+/// Capsule oriented towards its X-Axis
 #[derive(Debug, Clone)]
 pub struct Capsule {
-    pub point_a: Vec3,
-    pub point_b: Vec3,
+    pub xform: Mat4,
     pub radius: f32,
+    pub half_height: f32,
 }
 
 impl DebugLoggable for Capsule {
@@ -243,14 +244,15 @@ impl DebugLoggable for Capsule {
     }
 
     fn position(&self) -> Vec3 {
-        (self.point_a + self.point_b) / 2.0
+        self.xform.w_axis.truncate()
     }
 
     fn as_json(&self) -> String {
+        let xform = Mat3::from_mat4(self.xform).to_cols_array();
         json!({
-            "a": [self.point_a.x, self.point_a.y, self.point_a.z],
-            "b": [self.point_b.x, self.point_b.y, self.point_b.z],
             "r": self.radius,
+            "h": self.half_height,
+            "xform": xform,
         })
         .to_string()
     }
