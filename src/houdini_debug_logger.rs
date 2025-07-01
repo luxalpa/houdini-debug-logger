@@ -399,7 +399,7 @@ impl Drop for HoudiniDebugLogger {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Armature, Capsule, Line, Polygon, Polyline};
+    use crate::{Armature, Capsule, Line, Polygon, Polyline, Sphere};
     use glam::{Mat4, Quat, Vec3};
 
     #[test]
@@ -451,8 +451,8 @@ mod tests {
                 names: vec!["root".to_string(), "child".to_string()],
                 parents: vec![-1, 0],
                 xforms: vec![
-                    Mat4::IDENTITY,
-                    Mat4::from_translation(Vec3::new(1.0, 0.0, 0.0)),
+                    Mat4::from_translation(Vec3::new(-1.0, 0.0, 2.0)),
+                    Mat4::from_translation(Vec3::new(1.0, 2.0, 3.0)),
                 ],
             },
         );
@@ -463,6 +463,14 @@ mod tests {
                 point_a: Vec3::new(0.0, 0.0, 0.0),
                 point_b: Vec3::new(1.0, 0.0, 0.0),
                 radius: 0.5,
+            },
+        );
+
+        houlog(
+            "test-sphere",
+            Sphere {
+                center: Vec3::new(0.0, 3.0, 0.0),
+                radius: 2.5,
             },
         );
 

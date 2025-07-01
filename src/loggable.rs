@@ -23,6 +23,7 @@ impl DebugLoggable for Vec3 {
     fn kind(&self) -> String {
         "vec3".to_string()
     }
+
     fn position(&self) -> Vec3 {
         *self
     }
@@ -41,6 +42,7 @@ impl DebugLoggable for Mat4 {
     fn kind(&self) -> String {
         "mat4".to_string()
     }
+
     fn position(&self) -> Vec3 {
         self.w_axis.truncate()
     }
@@ -64,6 +66,7 @@ impl DebugLoggable for Quat {
     fn kind(&self) -> String {
         "quat".to_string()
     }
+
     fn position(&self) -> Vec3 {
         Vec3::new(0.0, 0.0, 0.0)
     }
@@ -82,6 +85,7 @@ impl DebugLoggable for f32 {
     fn kind(&self) -> String {
         "float".to_string()
     }
+
     fn position(&self) -> Vec3 {
         Vec3::new(0.0, 0.0, 0.0)
     }
@@ -100,6 +104,7 @@ impl DebugLoggable for Polyline {
     fn kind(&self) -> String {
         "line".to_string()
     }
+
     fn position(&self) -> Vec3 {
         self.points[0]
     }
@@ -142,6 +147,7 @@ impl DebugLoggable for Polygon {
     fn kind(&self) -> String {
         "polygon".to_string()
     }
+
     fn position(&self) -> Vec3 {
         self.points[0]
     }
@@ -171,6 +177,7 @@ impl DebugLoggable for Mesh {
     fn kind(&self) -> String {
         "mesh".to_string()
     }
+
     fn position(&self) -> Vec3 {
         self.vertices[0]
     }
@@ -202,6 +209,7 @@ impl DebugLoggable for Armature {
     fn kind(&self) -> String {
         "armature".to_string()
     }
+
     fn position(&self) -> Vec3 {
         self.xforms[0].w_axis.truncate()
     }
@@ -233,6 +241,7 @@ impl DebugLoggable for Capsule {
     fn kind(&self) -> String {
         "capsule".to_string()
     }
+
     fn position(&self) -> Vec3 {
         (self.point_a + self.point_b) / 2.0
     }
@@ -242,6 +251,29 @@ impl DebugLoggable for Capsule {
             "a": [self.point_a.x, self.point_a.y, self.point_a.z],
             "b": [self.point_b.x, self.point_b.y, self.point_b.z],
             "r": self.radius,
+        })
+        .to_string()
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Sphere {
+    pub center: Vec3,
+    pub radius: f32,
+}
+
+impl DebugLoggable for Sphere {
+    fn kind(&self) -> String {
+        "sphere".to_string()
+    }
+
+    fn position(&self) -> Vec3 {
+        self.center
+    }
+
+    fn as_json(&self) -> String {
+        json!({
+            "radius": self.radius,
         })
         .to_string()
     }
