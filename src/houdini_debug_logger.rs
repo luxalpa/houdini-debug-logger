@@ -1,3 +1,4 @@
+use std::ffi::CString;
 use std::net::{Ipv4Addr, SocketAddrV4};
 use std::path::PathBuf;
 use std::sync::{Mutex, OnceLock};
@@ -274,7 +275,7 @@ impl HoudiniDebugLogger {
                 0,
                 point_names
                     .iter()
-                    .map(|name| name.as_str())
+                    .map(|name| CString::new(name.as_str()).unwrap())
                     .collect::<Vec<_>>()
                     .as_slice(),
             )?;
@@ -302,7 +303,7 @@ impl HoudiniDebugLogger {
                 0,
                 point_kinds
                     .iter()
-                    .map(|name| name.as_str())
+                    .map(|name| CString::new(name.as_str()).unwrap())
                     .collect::<Vec<_>>()
                     .as_slice(),
             )?;
@@ -352,7 +353,7 @@ impl HoudiniDebugLogger {
                 0,
                 pt_metadata
                     .iter()
-                    .map(|name| name.as_str())
+                    .map(|name| CString::new(name.as_str()).unwrap())
                     .collect::<Vec<_>>()
                     .as_slice(),
             )?;
